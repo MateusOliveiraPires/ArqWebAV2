@@ -1,21 +1,35 @@
-//require('dotenv').config()
+// configurar variáveis de ambiente
+require('dotenv').config()
+
+// configurar o express
 const express = require('express')
+
 const app = express()
 
+// logging
 const morgan = require('morgan')
 app.use(morgan(':method :url: :status :res[content-length] - :response-time ms'))
+
+// monitoramento
 app.use(require('express-status-monitor')())
-const mongoose = require("mongoose");
-mongoose.Promise = global.Promise;
-const db = {};
-db.mongoose = mongoose;
-db.url = "mongodb://localhost:27017/ativ8";
-db.mongoose
-    .connect(db.url, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
+
+// configurar acesso a banco mongodb
+const mongoose = require('mongoose')
+
+mongoose.connect(process.env.DATABASE_URL)
+
+const db = mongoose.connection
+
+db.on('error', (error) => console.log(error))
+
+db.once('open', () => console.log('Connected to Mongo DB'))
+
 app.use(express.json())
+
+
+
+//Adicionando a Rota 
 const postRouter = require('./routes/post')
 app.use('/v1/post', postRouter)
+
 app.listen(3000, () => console.log('Server started.'))
